@@ -12,7 +12,7 @@ class IDSBase(ABC):
     #     pass
 
     @abstractmethod
-    def configure(self):
+    def configure(self, content):
         """
         Method for setting up the main configuration file in the corresponding location
         gets a file content as input and needs to save it to the location necesary for the IDS system
