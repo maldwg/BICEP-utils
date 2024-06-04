@@ -19,7 +19,15 @@ class IDSBase(ABC):
         """
         return "base implementation"
 
-        
+    @abstractmethod
+    def configure_ruleset(self, content):
+        """
+        Method for setting up the main configuration file in the corresponding location
+        gets a file content as input and needs to save it to the location necesary for the IDS system
+        """
+        return "base implementation"
+
+
     # @abstractmethod
     # def startStaticAnalysis(self):
     #     pass
