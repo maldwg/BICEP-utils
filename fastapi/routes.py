@@ -43,7 +43,7 @@ async def static_analysis(container_id: str = Form(...), file: UploadFile = Form
     temporary_file_path = "/tmp/dataset.pcap"
     await save_file(file, temporary_file_path)
     response = await ids.startStaticAnalysis(temporary_file_path, int(container_id))
-
+    # TODO: what if not ok ? statuscode 200?
     http_response = Response(content=response, status_code=200)
     return http_response
 
