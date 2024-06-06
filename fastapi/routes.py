@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, UploadFile, Form, Response
 from ..models.ids_base import IDSBase
 from .dependencies import get_ids_instance
 from .utils import save_file, get_env_variable
-from ...validation.models import NetworkAnalysisData, StaticAnalysisData
+from ..validation.models import NetworkAnalysisData, StaticAnalysisData
 import httpx
 
 router = APIRouter()
