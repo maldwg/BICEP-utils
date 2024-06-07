@@ -10,7 +10,7 @@ async def save_file(file, path):
 
 
 async def get_env_variable(name: str):
-    return await os.getenv(name)
+    return os.getenv(name)
 
 
 
@@ -37,3 +37,15 @@ async def wait_for_process_completion(pid):
                 return process.returncode
     except psutil.NoSuchProcess:
         return None  # Process with given PID does not exist
+    
+
+
+async def stop_process(pid: int):
+    try:
+        process = psutil.Process(pid)
+        if process.is_running():
+            process.terminate()
+    except psutil.NoSuchProcess:
+        print(f"No such process with pid {pid}")
+    except Exception as e:
+        print(e)

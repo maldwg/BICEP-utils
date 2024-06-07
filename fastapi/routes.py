@@ -6,6 +6,7 @@ from .dependencies import get_ids_instance
 from .utils import save_file, get_env_variable
 from ..validation.models import NetworkAnalysisData, StaticAnalysisData
 import httpx
+import asyncio
 
 router = APIRouter()
 
@@ -42,9 +43,8 @@ async def static_analysis(container_id: str = Form(...), file: UploadFile = Form
 
     temporary_file_path = "/tmp/dataset.pcap"
     await save_file(file, temporary_file_path)
-    response = await ids.startStaticAnalysis(temporary_file_path, int(container_id))
-    # TODO: what if not ok ? statuscode 200?
-    http_response = Response(content=response, status_code=200)
+    asyncio.create_task(ids.startStaticAnalysis(temporary_file_path, int(container_id)))
+    http_response = Response(content=f"Started analysis for container {container_id}", status_code=200)
     return http_response
 
 @router.post("/analysis/network")
@@ -60,7 +60,7 @@ async def stop_analysis(ids: IDSBase = Depends(get_ids_instance)):
 async def tell_core_analysis_has_finished(container_id: int):
     # tell the core to stop/set status to idle again
     core_url = await get_env_variable("CORE_URL")
-    endpoint = f"/ids/analysis/finish/{container_id}"
+    endpoint = f"/ids/analysis/finished/{container_id}"
     async with httpx.AsyncClient() as client:
         response: HTTPResponse = await client.post(core_url+endpoint)
     return response
