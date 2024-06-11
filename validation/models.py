@@ -1,10 +1,12 @@
 from pydantic import BaseModel
+from typing import Optional
 
 class NetworkAnalysisData(BaseModel):
     """
 
     """
     container_id: int
+    ensemble_id: Optional[int]
 
 
 class StaticAnalysisData(BaseModel):
@@ -12,4 +14,5 @@ class StaticAnalysisData(BaseModel):
 
     """
     container_id: int
+    ensemble_id: Optional[int]
     dataset_id: int

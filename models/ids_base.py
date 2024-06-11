@@ -26,6 +26,11 @@ class IDSBase(ABC):
     def container_id(self):
         pass
 
+    @property
+    @abstractmethod
+    def ensemble_id(self):
+        pass
+
     @abstractmethod
     def configure(self, file_path):
         """
