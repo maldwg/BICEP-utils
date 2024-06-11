@@ -8,6 +8,16 @@ class IDSBase(ABC):
     
     @property
     @abstractmethod
+    def log_location(self):
+        pass
+
+    @property
+    @abstractmethod
+    def network_interface(self):
+        pass
+
+    @property
+    @abstractmethod
     def configuration_location(self):
         pass
 

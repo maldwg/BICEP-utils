@@ -49,7 +49,7 @@ async def static_analysis(container_id: str = Form(...), file: UploadFile = Form
 
 @router.post("/analysis/network")
 async def network_analysis(network_analysis_data: NetworkAnalysisData, ids: IDSBase = Depends(get_ids_instance)):
-    response = await ids.startNetworkAnalysis()
+    response = await ids.startNetworkAnalysis(network_analysis_data.container_id)
     return response
 
 @router.post("/analysis/stop/")
