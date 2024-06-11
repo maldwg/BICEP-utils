@@ -1,4 +1,5 @@
 from http.client import HTTPException, HTTPResponse
+from typing import Optional
 
 from fastapi import APIRouter, Depends, UploadFile, Form, Response
 from ..models.ids_base import IDSBase
@@ -37,9 +38,12 @@ async def test(file: UploadFile = None ,ids: IDSBase = Depends(get_ids_instance)
 
 
 @router.post("/analysis/static")
-async def static_analysis(container_id: str = Form(...), file: UploadFile = Form(...), ids: IDSBase = Depends(get_ids_instance)):
+async def static_analysis(ensemble_id: Optional[str] = Form(None), container_id: str = Form(...), file: UploadFile = Form(...), ids: IDSBase = Depends(get_ids_instance)):
     if file is None:
         raise HTTPException(status_code=400, detail="No file provided")
+    
+    if ensemble_id != None:
+        ids.ensemble_id = ensemble_id
 
     temporary_file_path = "/tmp/dataset.pcap"
     await save_file(file, temporary_file_path)
