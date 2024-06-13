@@ -15,7 +15,6 @@ router = APIRouter()
 async def healthcheck():
     return {"message": "healthy"}
 
-# TODO: einmal alles testen (setup ensemble, analysis start, stop, etc.)
 
 @router.post("/configuration")
 async def test(container_id: str = Form(...) , file: UploadFile = Form(...)  ,ids: IDSBase = Depends(get_ids_instance)):
@@ -29,6 +28,18 @@ async def test(container_id: str = Form(...) , file: UploadFile = Form(...)  ,id
     await save_file(file, temporary_file_path)
     response = await ids.configure(temporary_file_path)
     return {"message": response}
+
+@router.post("/configure/ensemble/add/{ensemble_id}")
+async def add_to_ensemble(ensemble_id: int, ids: IDSBase = Depends(get_ids_instance)):
+    ids.ensemble_id = ensemble_id
+    return {"message": f"Added IDS to ensemble {ensemble_id}"}
+
+@router.post("/configure/ensemble/remove}")
+async def remove_from_ensemble(ids: IDSBase = Depends(get_ids_instance)):
+    message = {"message": f"Removed IDS to ensemble {ids.ensemble_id}"}
+    ids.ensemble_id = None
+
+    return message
 
 
 @router.post("/ruleset")
