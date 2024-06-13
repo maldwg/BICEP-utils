@@ -73,7 +73,7 @@ async def network_analysis(network_analysis_data: NetworkAnalysisData, ids: IDSB
     if network_analysis_data.ensemble_id != None:
         ids.ensemble_id = network_analysis_data.ensemble_id
 
-    response = await ids.startNetworkAnalysis(network_analysis_data.container_id)
+    response = await ids.startNetworkAnalysis()
     return response
 
 @router.post("/analysis/stop/")
