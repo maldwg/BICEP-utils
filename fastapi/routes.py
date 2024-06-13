@@ -15,7 +15,7 @@ router = APIRouter()
 async def healthcheck():
     return {"message": "healthy"}
 
-# TODO: einmal alles testen (setup container, ensemble, analysis start, stop, etc.)
+# TODO: einmal alles testen (setup ensemble, analysis start, stop, etc.)
 
 @router.post("/configuration")
 async def test(container_id: str = Form(...) , file: UploadFile = Form(...)  ,ids: IDSBase = Depends(get_ids_instance)):
@@ -48,11 +48,11 @@ async def static_analysis(ensemble_id: Optional[str] = Form(None), container_id:
         raise HTTPException(status_code=400, detail="No file provided")
     
     if ensemble_id != None:
-        ids.ensemble_id = ensemble_id
+        ids.ensemble_id = int(ensemble_id)
 
     temporary_file_path = "/tmp/dataset.pcap"
     await save_file(file, temporary_file_path)
-    asyncio.create_task(ids.startStaticAnalysis(temporary_file_path, int(container_id)))
+    asyncio.create_task(ids.startStaticAnalysis(temporary_file_path))
     http_response = Response(content=f"Started analysis for container {container_id}", status_code=200)
 
     return http_response
@@ -75,7 +75,7 @@ async def stop_analysis(ids: IDSBase = Depends(get_ids_instance)):
   
     return response
 
-async def tell_core_analysis_has_finished(ids: IDSBase = Depends(get_ids_instance)):
+async def tell_core_analysis_has_finished(ids: IDSBase):
     if ids.ensemble_id == None:
         endpoint = f"/ids/analysis/finished/{ids.container_id}"
     else:

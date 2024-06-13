@@ -6,7 +6,6 @@ class IDSBase(ABC):
     Abstract base class for all IDS supported by BICEP
     Each IDS involved needs to inherit from this base class and implement the following methods nad attributes
     """
-    
     container_id: int = None
     ensemble_id: int = None
     
@@ -64,7 +63,7 @@ class IDSBase(ABC):
 
         await stop_process(self.pid)
         self.pid = None
-        await tell_core_analysis_has_finished()
+        await tell_core_analysis_has_finished(self)
 
         
     # def sendMetrics(self):
