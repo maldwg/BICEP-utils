@@ -66,7 +66,6 @@ class IDSBase(ABC):
         self.pid = None
         await tell_core_analysis_has_finished()
 
-
         
     # def sendMetrics(self):
     #     pass
