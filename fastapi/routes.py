@@ -34,7 +34,7 @@ async def add_to_ensemble(ensemble_id: int, ids: IDSBase = Depends(get_ids_insta
     ids.ensemble_id = ensemble_id
     return {"message": f"Added IDS to ensemble {ensemble_id}"}
 
-@router.post("/configure/ensemble/remove}")
+@router.post("/configure/ensemble/remove")
 async def remove_from_ensemble(ids: IDSBase = Depends(get_ids_instance)):
     message = {"message": f"Removed IDS to ensemble {ids.ensemble_id}"}
     ids.ensemble_id = None
