@@ -78,7 +78,7 @@ async def network_analysis(network_analysis_data: NetworkAnalysisData, ids: IDSB
     response = await ids.startNetworkAnalysis()
     return Response(content=response, status_code=200)
 
-@router.post("/analysis/stop/")
+@router.post("/analysis/stop")
 async def stop_analysis(ids: IDSBase = Depends(get_ids_instance)):
     await ids.stopAnalysis()  
 
