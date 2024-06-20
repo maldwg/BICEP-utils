@@ -65,6 +65,8 @@ class IDSBase(ABC):
         self.pid = None
         await tell_core_analysis_has_finished(self)
 
+        # TODO return 200 herre if succesfull ansonsten 307 apparently te default
+
         
     # def sendMetrics(self):
     #     pass
