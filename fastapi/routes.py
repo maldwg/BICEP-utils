@@ -78,12 +78,13 @@ async def network_analysis(network_analysis_data: NetworkAnalysisData, ids: IDSB
 
 @router.post("/analysis/stop/")
 async def stop_analysis(ids: IDSBase = Depends(get_ids_instance)):
-    response = await ids.stopAnalysis()  
+    await ids.stopAnalysis()  
 
     # reset ensemble id to wait if next analysis is for ensemble or ids solo
     if ids.ensemble_id != None:
         ids.ensemble_id = None
   
+    response = Response("successfully stopped analysis", 200)
     return response
 
 async def tell_core_analysis_has_finished(ids: IDSBase):

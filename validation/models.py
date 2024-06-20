@@ -5,7 +5,7 @@ class NetworkAnalysisData(BaseModel):
     """
 
     """
-    container_id: int
+    container_id: Optional[int]
     ensemble_id: Optional[int]
 
 
@@ -13,6 +13,6 @@ class StaticAnalysisData(BaseModel):
     """
 
     """
-    container_id: int
+    container_id: Optional[int]
     ensemble_id: Optional[int]
     dataset_id: int
