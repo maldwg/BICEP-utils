@@ -16,6 +16,8 @@ async def healthcheck():
     return {"message": "healthy"}
 
 
+# TODO: send status codeds and response objects every time
+
 @router.post("/configuration")
 async def test(container_id: str = Form(...) , file: UploadFile = Form(...)  ,ids: IDSBase = Depends(get_ids_instance)):
     if file is None:
@@ -49,8 +51,8 @@ async def test(file: UploadFile = None ,ids: IDSBase = Depends(get_ids_instance)
 
     temporary_file_path = "/tmp/temporary.txt"
     await save_file(file, temporary_file_path)
-    rsponse = await ids.configure_ruleset(temporary_file_path)
-    return {"message": rsponse}
+    response = await ids.configure_ruleset(temporary_file_path)
+    return {"message": response}
 
 
 @router.post("/analysis/static")
@@ -74,7 +76,7 @@ async def network_analysis(network_analysis_data: NetworkAnalysisData, ids: IDSB
         ids.ensemble_id = network_analysis_data.ensemble_id
 
     response = await ids.startNetworkAnalysis()
-    return response
+    return Response(content=response, status_code=200)
 
 @router.post("/analysis/stop/")
 async def stop_analysis(ids: IDSBase = Depends(get_ids_instance)):
@@ -84,7 +86,7 @@ async def stop_analysis(ids: IDSBase = Depends(get_ids_instance)):
     if ids.ensemble_id != None:
         ids.ensemble_id = None
   
-    response = Response("successfully stopped analysis", 200)
+    response = Response(content="successfully stopped analysis", status_code=200)
     return response
 
 async def tell_core_analysis_has_finished(ids: IDSBase):
