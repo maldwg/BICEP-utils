@@ -73,9 +73,6 @@ async def static_analysis(ensemble_id: Optional[str] = Form(None), container_id:
     return http_response
 
 @router.post("/analysis/network")
-# TODO 5: add parser to network analysis as well (time based, each 2 min.)
- # TODO 2: how to add for ensemble aswell ?
-
 async def network_analysis(network_analysis_data: NetworkAnalysisData, ids: IDSBase = Depends(get_ids_instance)):
     if network_analysis_data.ensemble_id != None:
         ids.ensemble_id = network_analysis_data.ensemble_id
