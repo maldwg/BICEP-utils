@@ -57,7 +57,6 @@ async def test(file: UploadFile = None ,ids: IDSBase = Depends(get_ids_instance)
 
 
 @router.post("/analysis/static")
-# TODO 4: for slips and suricata write a parser each to press in correct fields/necessary
 async def static_analysis(ensemble_id: Optional[str] = Form(None), container_id: str = Form(...), file: UploadFile = Form(...), ids: IDSBase = Depends(get_ids_instance)):
     if file is None:
         raise HTTPException(status_code=400, detail="No file provided")
