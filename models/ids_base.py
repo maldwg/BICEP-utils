@@ -1,10 +1,38 @@
 from abc import ABC, abstractmethod
+from datetime import datetime
+
+class IDSParser(ABC):
+
+    @property
+    @abstractmethod
+    async def alertFileLocation(self):
+        pass
+    @abstractmethod
+    async def parse_alerts_from_file(self):
+        pass
+    @abstractmethod
+    async def parse_alerts_from_network_traffic(self):
+        pass
+
+class Alert():
+    """
+    Class which contains the most important fields of an alert (one line of anomaly).
+    It presents a standardized interface for the different IDS to map their distinct alerts to.
+    """
+    time: datetime
+    source: str
+    destination: str
+    severity: int
+    type: str
+    message: str
+
+
 
 
 class IDSBase(ABC):
     """
     Abstract base class for all IDS supported by BICEP
-    Each IDS involved needs to inherit from this base class and implement the following methods nad attributes
+    Each IDS involved needs to inherit from this base class and implement the following methods and attributes
     """
     container_id: int = None
     ensemble_id: int = None
