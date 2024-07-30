@@ -52,7 +52,16 @@ class Alert():
     def __str__(self):
         return f"{self.time}, From: {self.source}, To: {self.destination}, Type: {self.type}, Content: {self.message}, Severity: {self.severity}"
 
-
+    def to_dict(self):
+        return {
+            # Convert datetime to ISO format string to be JSON serializable
+            'time': self.time.isoformat(),  
+            'source': self.source,
+            'destination': self.destination,
+            'severity': self.severity,
+            'type': self.type,
+            'message': self.message
+        }
 
 class IDSBase(ABC):
     """
