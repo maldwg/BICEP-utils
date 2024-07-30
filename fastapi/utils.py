@@ -1,11 +1,12 @@
 from http.client import HTTPResponse
+import json
 import os
 import psutil 
 import subprocess
 import asyncio
 import httpx
 from ..models.ids_base import Alert
-import json 
+
 async def save_file(file, path):
     with open(path, "wb") as f:
         f.write(await file.read())
@@ -85,7 +86,6 @@ async def send_alerts_to_core(ids):
     alerts: list[Alert] = await ids.parser.parse_alerts()
     json_alerts = [ a.to_dict() for a in alerts] 
     data = {"alerts": json_alerts, "analysis_type": "static"}
-
     async with httpx.AsyncClient() as client:
         response: HTTPResponse = await client.post(core_url+endpoint, data=json.dumps(data))
     return response
@@ -107,7 +107,7 @@ async def send_alerts_to_core_periodically(ids, period="30"):
             data = {"alerts": json_alerts, "analysis_type": "network"}
             try:
                 async with httpx.AsyncClient() as client:
-                    response: HTTPResponse = await client.post(core_url+endpoint, json=json.dumps(data))
+                    response: HTTPResponse = await client.post(core_url+endpoint, data=json.dumps(data))
             except Exception as e:
                 print("Somethign went wrong during alert sending... retrying on next iteration")
                 

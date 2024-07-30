@@ -37,10 +37,10 @@ class Alert():
     Class which contains the most important fields of an alert (one line of anomaly).
     It presents a standardized interface for the different IDS to map their distinct alerts to.
     """
-    time: datetime
+    time: str
     source: str
     destination: str
-    severity: int
+    severity: float
     type: str
     message: str
 
@@ -50,7 +50,7 @@ class Alert():
     def to_dict(self):
         return {
             # Convert datetime to ISO format string to be JSON serializable
-            "time": self.time.isoformat(),  
+            "time": self.time,  
             "source": self.source,
             "destination": self.destination,
             "severity": self.severity,
