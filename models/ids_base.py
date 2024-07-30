@@ -3,15 +3,38 @@ from datetime import datetime
 
 class IDSParser(ABC):
 
+    timestamp_format = '%Y-%m-%dT%H:%M:%S.%f%z'
+
     @property
     @abstractmethod
     async def alertFileLocation(self):
         pass
     @abstractmethod
-    async def parse_alerts_from_file(self):
+    async def parse_alerts_from_file(self, file_location):
+        """
+        Method triggered once after the static analysis is complete. Takes in the whole file, reads it, parses it, deletes it and returns the parsed lines
+        """
         pass
     @abstractmethod
-    async def parse_alerts_from_network_traffic(self):
+    async def parse_alerts_from_network_traffic(self, file_location):
+        """
+        periodically triggered method to parse the traffic from the interface. The traffic is stored in files as for the direct file parsing above
+        """
+        pass
+
+    @abstractmethod
+    async def parse_line(self, line):
+        """
+        Method to parse one line at a time into the Alert object
+        """
+        pass
+
+    @abstractmethod
+    async def normalize_threat_levels(self, threat: int):
+        """
+       Normalize the threat levels which are individual for each IDS from 0 to 1 (1 being the highest)
+       returns decimal values with only 2 decimals
+        """
         pass
 
 class Alert():
@@ -26,6 +49,8 @@ class Alert():
     type: str
     message: str
 
+    def __str__(self):
+        return f"{self.time}, From: {self.source}, To: {self.destination}, Type: {self.type}, Content: {self.message}, Severity: {self.severity}"
 
 
 
