@@ -10,15 +10,10 @@ class IDSParser(ABC):
     async def alertFileLocation(self):
         pass
     @abstractmethod
-    async def parse_alerts_from_file(self, file_location):
+    async def parse_alerts(self, file_location):
         """
-        Method triggered once after the static analysis is complete. Takes in the whole file, reads it, parses it, deletes it and returns the parsed lines
-        """
-        pass
-    @abstractmethod
-    async def parse_alerts_from_network_traffic(self, file_location):
-        """
-        periodically triggered method to parse the traffic from the interface. The traffic is stored in files as for the direct file parsing above
+        Method triggered once after the static analysis is complete or periodically for a network analysis. 
+        Takes in the whole file, reads it, parses it, deletes it and returns the parsed lines
         """
         pass
 
