@@ -86,8 +86,7 @@ class IDSBase(ABC):
 
 
     async def stopAnalysis(self):
-        from src.utils.fastapi.utils import stop_process
-        from src.utils.fastapi.routes import tell_core_analysis_has_finished
+        from src.utils.fastapi.utils import stop_process, tell_core_analysis_has_finished
 
         await stop_process(self.pid)
         self.pid = None
