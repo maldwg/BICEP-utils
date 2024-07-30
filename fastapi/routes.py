@@ -89,39 +89,3 @@ async def stop_analysis(ids: IDSBase = Depends(get_ids_instance)):
   
     response = Response(content="successfully stopped analysis", status_code=200)
     return response
-
-async def tell_core_analysis_has_finished(ids: IDSBase):
-    if ids.ensemble_id == None:
-        endpoint = f"/ids/analysis/finished/{ids.container_id}"
-    else:
-        endpoint = f"/ensemble/{ids.ensemble_id}/analysis/finished/{ids.container_id}"
-    
-    # tell the core to stop/set status to idle again
-    core_url = await get_env_variable("CORE_URL")
-        # reset ensemble id to wait if next analysis is for ensemble or ids solo
-
-    async with httpx.AsyncClient() as client:
-        response: HTTPResponse = await client.post(core_url+endpoint)
-
-    # reset ensemble id after each analysis is completed to keep track if analysis has been triggered for ensemble or not
-    if ids.ensemble_id != None:
-        ids.ensemble_id = None
-
-    return response
-
-
-async def send_alerts_to_core(ids: IDSBase, alerts: list[Alert], analysis_type: str):
-    if ids.ensemble_id == None:
-        endpoint = f"/ids/alerts/{ids.container_id}"
-    else:
-        endpoint = f"/ensemble/{ids.ensemble_id}/alerts/{ids.container_id}"
-
-    # tell the core to stop/set status to idle again
-    core_url = await get_env_variable("CORE_URL")
-        # reset ensemble id to wait if next analysis is for ensemble or ids solo
-
-    data = {'alerts': alerts, 'analysis_type': analysis_type}
-    async with httpx.AsyncClient() as client:
-        response: HTTPResponse = await client.post(core_url+endpoint, json=data)
-
-    return response
