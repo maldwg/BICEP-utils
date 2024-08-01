@@ -44,6 +44,14 @@ class Alert():
     type: str
     message: str
 
+    def __init__(self, time, source, destination, severity, type, message):
+        self.time=time
+        self.source=source
+        self.destination=destination
+        self.severity=severity
+        self.type=type
+        self.message=message
+
     def __str__(self):
         return f"{self.time}, From: {self.source}, To: {self.destination}, Type: {self.type}, Content: {self.message}, Severity: {self.severity}"
 
