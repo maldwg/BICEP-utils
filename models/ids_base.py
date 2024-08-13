@@ -44,7 +44,7 @@ class Alert():
     type: str
     message: str
 
-    def __init__(self, time, source, destination, severity, type, message):
+    def __init__(self, time=None, source=None, destination=None, severity=None, type=None, message=None):
         self.time=time
         self.source=source
         self.destination=destination
