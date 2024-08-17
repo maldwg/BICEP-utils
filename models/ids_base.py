@@ -123,13 +123,16 @@ class IDSBase(ABC):
         """
         pass
 
-
+    @abstractmethod
     async def stopAnalysis(self):
-        from src.utils.fastapi.utils import stop_process, tell_core_analysis_has_finished
+        """
+        Method for stopping the process used to trigger the analysis. Can be overwritten in the calss implementation for the IDS
+        """
+        # Example implementation:
 
-        await stop_process(self.pid)
-        self.pid = None
-        await tell_core_analysis_has_finished(self)
+        # await stop_process(self.pid)
+        # self.pid = None
+        # await tell_core_analysis_has_finished(self)
 
         
     # def sendMetrics(self):

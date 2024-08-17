@@ -75,7 +75,6 @@ async def tell_core_analysis_has_finished(ids):
     # reset ensemble id after each analysis is completed to keep track if analysis has been triggered for ensemble or not
     if ids.ensemble_id != None:
         ids.ensemble_id = None
-
     return response
 
 
@@ -92,7 +91,8 @@ async def send_alerts_to_core(ids):
 
     data = {"container_id": ids.container_id, "ensemble_id": ids.ensemble_id, "alerts": json_alerts, "analysis_type": "static", "dataset_id": ids.dataset_id}
     async with httpx.AsyncClient() as client:
-        response: HTTPResponse = await client.post(core_url+endpoint, data=json.dumps(data))
+        # set timeout to 90, to be able to send all alerts
+        response: HTTPResponse = await client.post(core_url+endpoint, data=json.dumps(data), timeout=90)
 
     # remove dataset here, becasue removing it in tell_core function removes the id before using it here otehrwise
     if ids.dataset_id != None:
@@ -117,7 +117,8 @@ async def send_alerts_to_core_periodically(ids, period="30"):
             data = {"container_id": ids.container_id, "ensemble_id": ids.ensemble_id, "alerts": json_alerts, "analysis_type": "network", "dataset_id": None}
             try:
                 async with httpx.AsyncClient() as client:
-                    response: HTTPResponse = await client.post(core_url+endpoint, data=json.dumps(data))
+                    # set timeout to 90 seconds to be able to send all alerts
+                    response: HTTPResponse = await client.post(core_url+endpoint, data=json.dumps(data), timeout=90)
             except Exception as e:
                 print("Somethign went wrong during alert sending... retrying on next iteration")
                 
