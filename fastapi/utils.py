@@ -124,5 +124,5 @@ async def send_alerts_to_core_periodically(ids, period: float=60):
             await asyncio.sleep(period)
 
     except asyncio.CancelledError as e:
-        print(f"Canceled the sending of alerts for network analysis for ids {ids.id}")
+        print(f"Canceled the sending of alerts")
         
