@@ -101,8 +101,8 @@ async def send_alerts_to_core(ids):
     return response
 
 
-
-async def send_alerts_to_core_periodically(ids, period="30"):
+# TODO 1: adjust to 300 secodns
+async def send_alerts_to_core_periodically(ids, period: float=60):
     try:
         if ids.ensemble_id == None:
             endpoint = f"/ids/publish/alerts"
@@ -120,8 +120,7 @@ async def send_alerts_to_core_periodically(ids, period="30"):
                     # set timeout to 90 seconds to be able to send all alerts
                     response: HTTPResponse = await client.post(core_url+endpoint, data=json.dumps(data), timeout=90)
             except Exception as e:
-                print("Somethign went wrong during alert sending... retrying on next iteration")
-                
+                print("Something went wrong during alert sending... retrying on next iteration")
             await asyncio.sleep(period)
 
     except asyncio.CancelledError as e:
