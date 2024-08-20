@@ -7,7 +7,7 @@ class IDSParser(ABC):
 
     @property
     @abstractmethod
-    async def alertFileLocation(self):
+    async def alert_file_location(self):
         pass
     @abstractmethod
     async def parse_alerts(self, file_location):
