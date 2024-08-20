@@ -73,8 +73,11 @@ class IDSBase(ABC):
     """
     container_id: int = None
     ensemble_id: int = None
+    pid: int = None
     # Id of the dataset used to trigger a static analysis
     dataset_id: int = None
+    static_analysis_running: bool = False
+    send_alerts_periodically_task = None
     
     @property
     @abstractmethod

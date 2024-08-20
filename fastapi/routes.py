@@ -69,6 +69,7 @@ async def static_analysis(ensemble_id: Optional[str] = Form(None), dataset_id: s
     temporary_file_path = "/tmp/dataset.pcap"
     await save_file(dataset, temporary_file_path)
     asyncio.create_task(ids.startStaticAnalysis(temporary_file_path))
+    ids.static_analysis_running = True
     http_response = Response(content=f"Started analysis for container {container_id}", status_code=200)
 
     return http_response
