@@ -57,16 +57,19 @@ async def test(file: UploadFile = None ,ids: IDSBase = Depends(get_ids_instance)
 
 
 @router.post("/analysis/static")
-async def static_analysis(ensemble_id: Optional[str] = Form(None), container_id: str = Form(...), file: UploadFile = Form(...), ids: IDSBase = Depends(get_ids_instance)):
-    if file is None:
+async def static_analysis(ensemble_id: Optional[str] = Form(None), dataset_id: str = Form(...), container_id: str = Form(...), dataset: UploadFile = Form(...), ids: IDSBase = Depends(get_ids_instance)):
+    if dataset is None:
         raise HTTPException(status_code=400, detail="No file provided")
     
     if ensemble_id != None:
         ids.ensemble_id = int(ensemble_id)
 
+    ids.dataset_id = dataset_id
+
     temporary_file_path = "/tmp/dataset.pcap"
-    await save_file(file, temporary_file_path)
+    await save_file(dataset, temporary_file_path)
     asyncio.create_task(ids.startStaticAnalysis(temporary_file_path))
+    ids.static_analysis_running = True
     http_response = Response(content=f"Started analysis for container {container_id}", status_code=200)
 
     return http_response
@@ -79,6 +82,8 @@ async def network_analysis(network_analysis_data: NetworkAnalysisData, ids: IDSB
     response = await ids.startNetworkAnalysis()
     return Response(content=response, status_code=200)
 
+
+# TODO 10: kills the whole process whysoever
 @router.post("/analysis/stop")
 async def stop_analysis(ids: IDSBase = Depends(get_ids_instance)):
     await ids.stopAnalysis()  
@@ -87,5 +92,8 @@ async def stop_analysis(ids: IDSBase = Depends(get_ids_instance)):
     if ids.ensemble_id != None:
         ids.ensemble_id = None
   
+    if ids.dataset_id != None:
+        ids.dataset_id = None
+        
     response = Response(content="successfully stopped analysis", status_code=200)
     return response

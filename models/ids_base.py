@@ -7,7 +7,7 @@ class IDSParser(ABC):
 
     @property
     @abstractmethod
-    async def alertFileLocation(self):
+    async def alert_file_location(self):
         pass
     @abstractmethod
     async def parse_alerts(self, file_location):
@@ -88,6 +88,11 @@ class IDSBase(ABC):
     """
     container_id: int = None
     ensemble_id: int = None
+    pid: int = None
+    # Id of the dataset used to trigger a static analysis
+    dataset_id: int = None
+    static_analysis_running: bool = False
+    send_alerts_periodically_task = None
     
     @property
     @abstractmethod
@@ -136,13 +141,16 @@ class IDSBase(ABC):
         """
         pass
 
-
+    @abstractmethod
     async def stopAnalysis(self):
-        from src.utils.fastapi.utils import stop_process, tell_core_analysis_has_finished
+        """
+        Method for stopping the process used to trigger the analysis. Can be overwritten in the calss implementation for the IDS
+        """
+        # Example implementation:
 
-        await stop_process(self.pid)
-        self.pid = None
-        await tell_core_analysis_has_finished(self)
+        # await stop_process(self.pid)
+        # self.pid = None
+        # await tell_core_analysis_has_finished(self)
 
         
     # def sendMetrics(self):
