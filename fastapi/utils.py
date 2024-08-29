@@ -3,7 +3,7 @@ import json
 import asyncio
 import httpx
 from ..models.ids_base import Alert
-from ..general_utilities import get_env_variable
+from ..general_utilities import get_env_variable, ANALYSIS_MODES
 
 
 
@@ -39,7 +39,7 @@ async def send_alerts_to_core(ids):
 
     # tell the core to stop/set status to idle again
     core_url = await get_env_variable("CORE_URL")
-    alerts: list[Alert] = await ids.parser.parse_alerts()
+    alerts: list[Alert] = await ids.parser.parse_alerts(ANALYSIS_MODES.STATIC.value)
     json_alerts = [ a.to_dict() for a in alerts] 
 
     data = {"container_id": ids.container_id, "ensemble_id": ids.ensemble_id, "alerts": json_alerts, "analysis_type": "static", "dataset_id": ids.dataset_id}
@@ -65,8 +65,11 @@ async def send_alerts_to_core_periodically(ids, period: float=60):
         core_url = await get_env_variable("CORE_URL")
 
         while True:
-            alerts: list[Alert] = await ids.parser.parse_alerts()
+            print("loop")
+            alerts: list[Alert] = await ids.parser.parse_alerts(ANALYSIS_MODES.NETWORK.value)
             json_alerts = [ a.to_dict() for a in alerts]
+            print("json_alerts")
+            print(json_alerts)
             data = {"container_id": ids.container_id, "ensemble_id": ids.ensemble_id, "alerts": json_alerts, "analysis_type": "network", "dataset_id": None}
             try:
                 async with httpx.AsyncClient() as client:

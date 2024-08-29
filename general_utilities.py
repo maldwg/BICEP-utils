@@ -2,6 +2,12 @@ import os
 import psutil 
 import subprocess
 import asyncio
+from enum import Enum
+
+
+class ANALYSIS_MODES(Enum):
+    STATIC= "static"
+    NETWORK ="network"
 
 async def save_file(file, path):
     with open(path, "wb") as f:
