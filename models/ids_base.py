@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from ..general_utilities import stop_process
-
+import json 
 class IDSParser(ABC):
 
     timestamp_format = '%Y-%m-%dT%H:%M:%S.%f%z'
@@ -52,12 +52,27 @@ class Alert():
         self.type=type
         self.message=message
 
+    @classmethod
+    def from_json(cls, json_alert: str):
+        # replace none with null to be able to load from json
+        json_str = json_alert.replace('None', 'null')
+        # replace single quotes with double quotes to be able to load it from json
+        json_str = json_str.replace("'",'"')
+        alert_dict = json.loads(json_str)
+        return Alert(
+            time=alert_dict["time"],
+            source=alert_dict["source"],
+            destination=alert_dict["destination"],
+            severity=alert_dict["severity"],
+            type=alert_dict["type"],
+            message=alert_dict["message"]
+        )
+
     def __str__(self):
         return f"{self.time}, From: {self.source}, To: {self.destination}, Type: {self.type}, Content: {self.message}, Severity: {self.severity}"
 
     def to_dict(self):
         return {
-            # Convert datetime to ISO format string to be JSON serializable
             "time": self.time,  
             "source": self.source,
             "destination": self.destination,
