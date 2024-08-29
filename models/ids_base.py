@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from ..general_utilities import stop_process
+from ..general_utilities import stop_process, ANALYSIS_MODES
 import json 
 class IDSParser(ABC):
 
@@ -10,7 +10,7 @@ class IDSParser(ABC):
     async def alert_file_location(self):
         pass
     @abstractmethod
-    async def parse_alerts(self, file_location):
+    async def parse_alerts(self, analysis_mode: ANALYSIS_MODES ,file_location):
         """
         Method triggered once after the static analysis is complete or periodically for a network analysis. 
         Takes in the whole file, reads it, parses it, deletes it and returns the parsed lines
