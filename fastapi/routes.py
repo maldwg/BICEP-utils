@@ -81,12 +81,9 @@ async def network_analysis(network_analysis_data: NetworkAnalysisData, ids: IDSB
     return Response(content=response, status_code=200)
 
 
-# TODO 10: kills the whole process whysoever
 @router.post("/analysis/stop")
 async def stop_analysis(ids: IDSBase = Depends(get_ids_instance)):
-    print("now topping triggered by the endpint")
     await ids.stopAnalysis()  
-    print("stopped processes")
 
     # reset ensemble id to wait if next analysis is for ensemble or ids solo
     if ids.ensemble_id != None:
@@ -95,6 +92,5 @@ async def stop_analysis(ids: IDSBase = Depends(get_ids_instance)):
     if ids.dataset_id != None:
         ids.dataset_id = None
     
-    print("set ids to none again")
     response = Response(content="successfully stopped analysis", status_code=200)
     return response
