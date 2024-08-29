@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from datetime import datetime
+from ..general_utilities import stop_process
 
 class IDSParser(ABC):
 
@@ -73,11 +73,12 @@ class IDSBase(ABC):
     """
     container_id: int = None
     ensemble_id: int = None
-    pid: int = None
+    pids: list[int] = []
     # Id of the dataset used to trigger a static analysis
     dataset_id: int = None
     static_analysis_running: bool = False
     send_alerts_periodically_task = None
+    tap_interface_name: str = None
     
     @property
     @abstractmethod
@@ -137,10 +138,11 @@ class IDSBase(ABC):
         # self.pid = None
         # await tell_core_analysis_has_finished(self)
 
-        
-    # def sendMetrics(self):
-    #     pass
-
-    
-    # def sendAlerts(self):
-    #     pass
+    async def stop_all_processes(self):
+        remove_process_ids = []
+        if self.pids != []:
+            for pid in self.pids:
+                await stop_process(pid)
+                remove_process_ids.append(pid)
+        for removed_pid in remove_process_ids:
+            self.pids.remove(removed_pid)
