@@ -65,11 +65,9 @@ async def send_alerts_to_core_periodically(ids, period: float=60):
         core_url = await get_env_variable("CORE_URL")
 
         while True:
-            print("loop")
             alerts: list[Alert] = await ids.parser.parse_alerts(ANALYSIS_MODES.NETWORK.value)
+
             json_alerts = [ a.to_dict() for a in alerts]
-            print("json_alerts")
-            print(json_alerts)
             data = {"container_id": ids.container_id, "ensemble_id": ids.ensemble_id, "alerts": json_alerts, "analysis_type": "network", "dataset_id": None}
             try:
                 async with httpx.AsyncClient() as client:
