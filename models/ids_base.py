@@ -99,12 +99,7 @@ class IDSBase(ABC):
     @abstractmethod
     async def log_location(self):
         pass
-
-    @property
-    @abstractmethod
-    async def network_interface(self):
-        pass
-
+    
     @property
     @abstractmethod
     async def configuration_location(self):

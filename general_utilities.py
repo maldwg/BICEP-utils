@@ -59,6 +59,9 @@ async def wait_for_process_completion(pid):
 async def create_and_activate_network_interface(tap_interface_name):
     setup_interface = ["ip", "link", "add", tap_interface_name, "type", "dummy"]
     await execute_command(setup_interface)
+    # ensure, interface is up
+    # TODO 10: make this a correct wait by watching for the interface to be created
+    await asyncio.sleep(2)
     activate_interface = ["ip", "link", "set", tap_interface_name, "up"]
     await execute_command(activate_interface)
     

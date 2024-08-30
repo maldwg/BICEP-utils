@@ -54,7 +54,7 @@ async def send_alerts_to_core(ids):
     return response
 
 
-# TODO 1: adjust to 300 secodns
+# TODO 0: adjust to 300 secodns
 async def send_alerts_to_core_periodically(ids, period: float=60):
     try:
         if ids.ensemble_id == None:
