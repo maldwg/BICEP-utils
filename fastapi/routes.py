@@ -1,13 +1,11 @@
-from http.client import HTTPException, HTTPResponse
+from http.client import HTTPException
 from typing import Optional
 
 from fastapi import APIRouter, Depends, UploadFile, Form, Response
 from ..models.ids_base import IDSBase
 from .dependencies import get_ids_instance
-from .utils import save_file, get_env_variable
-from ..validation.models import NetworkAnalysisData, StaticAnalysisData
-from ..models.ids_base import Alert
-import httpx
+from ..general_utilities import save_file
+from ..validation.models import NetworkAnalysisData
 import asyncio
 
 router = APIRouter()
@@ -17,6 +15,7 @@ async def healthcheck():
     return {"message": "healthy"}
 
 
+# TODO 10: send status codeds and response objects every time
 
 @router.post("/configuration")
 async def test(container_id: str = Form(...) , file: UploadFile = Form(...)  ,ids: IDSBase = Depends(get_ids_instance)):
@@ -92,6 +91,6 @@ async def stop_analysis(ids: IDSBase = Depends(get_ids_instance)):
   
     if ids.dataset_id != None:
         ids.dataset_id = None
-        
+    
     response = Response(content="successfully stopped analysis", status_code=200)
     return response
