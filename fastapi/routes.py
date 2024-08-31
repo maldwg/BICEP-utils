@@ -17,7 +17,6 @@ async def healthcheck():
     return {"message": "healthy"}
 
 
-# TODO: send status codeds and response objects every time
 
 @router.post("/configuration")
 async def test(container_id: str = Form(...) , file: UploadFile = Form(...)  ,ids: IDSBase = Depends(get_ids_instance)):
@@ -83,7 +82,6 @@ async def network_analysis(network_analysis_data: NetworkAnalysisData, ids: IDSB
     return Response(content=response, status_code=200)
 
 
-# TODO 10: kills the whole process whysoever
 @router.post("/analysis/stop")
 async def stop_analysis(ids: IDSBase = Depends(get_ids_instance)):
     await ids.stopAnalysis()  
