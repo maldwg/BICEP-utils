@@ -33,7 +33,6 @@ class IDSParser(ABC):
         pass
 
 class Alert():
-    # TODO 0: refactor alerts so that there is a destination port and source port differentioation
     """
     Class which contains the most important fields of an alert (one line of anomaly).
     It presents a standardized interface for the different IDS to map their distinct alerts to.
