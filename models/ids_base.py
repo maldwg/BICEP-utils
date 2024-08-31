@@ -33,21 +33,26 @@ class IDSParser(ABC):
         pass
 
 class Alert():
+    # TODO 0: refactor alerts so that there is a destination port and source port differentioation
     """
     Class which contains the most important fields of an alert (one line of anomaly).
     It presents a standardized interface for the different IDS to map their distinct alerts to.
     """
     time: str
-    source: str
-    destination: str
+    source_ip: str
+    source_port: str
+    destination_ip: str
+    destination_port: str
     severity: float
     type: str
     message: str
 
-    def __init__(self, time=None, source=None, destination=None, severity=None, type=None, message=None):
+    def __init__(self, time=None, source_ip=None, source_port=None, destination_ip=None, destination_port=None, severity=None, type=None, message=None):
         self.time=time
-        self.source=source
-        self.destination=destination
+        self.source_ip=source_ip
+        self.source_port=source_port
+        self.destination_ip=destination_ip
+        self.destination_port=destination_port
         self.severity=severity
         self.type=type
         self.message=message
@@ -61,21 +66,25 @@ class Alert():
         alert_dict = json.loads(json_str)
         return Alert(
             time=alert_dict["time"],
-            source=alert_dict["source"],
-            destination=alert_dict["destination"],
+            source_ip=alert_dict["source_ip"],
+            source_port=alert_dict["source_port"],
+            destination_ip=alert_dict["destination_ip"],
+            destination_port=alert_dict["destination_port"],
             severity=alert_dict["severity"],
             type=alert_dict["type"],
             message=alert_dict["message"]
         )
 
     def __str__(self):
-        return f"{self.time}, From: {self.source}, To: {self.destination}, Type: {self.type}, Content: {self.message}, Severity: {self.severity}"
+        return f"{self.time}, From: {self.source_ip}:{self.source_port}, To: {self.destination_ip}:{self.destination_port}, Type: {self.type}, Content: {self.message}, Severity: {self.severity}"
 
     def to_dict(self):
         return {
             "time": self.time,  
-            "source": self.source,
-            "destination": self.destination,
+            "source_ip": self.source_ip,
+            "source_port": self.source_port,
+            "destination_ip": self.destination_ip,
+            "destination_port": self.destination_port,
             "severity": self.severity,
             "type": self.type,
             "message": self.message
