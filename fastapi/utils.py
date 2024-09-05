@@ -3,7 +3,7 @@ import json
 import asyncio
 import httpx
 from ..models.ids_base import Alert
-from ..general_utilities import get_env_variable, ANALYSIS_MODES
+from ..general_utilities import get_env_variable, ANALYSIS_MODES, save_dataset
 
 
 
@@ -31,6 +31,17 @@ async def tell_core_analysis_has_finished(ids):
     return response
 
 
+async def alert_stream(alerts: Alert):
+    for alert in alerts:
+        yield json.dumps(alert.toJson()).encode()
+
+
+async def send_alerts_and_stop_analysis(ids):
+    response = await send_alerts_to_core(ids)
+    print(response)
+    res = await tell_core_analysis_has_finished(ids)
+    print(res)
+
 async def send_alerts_to_core(ids):
     if ids.ensemble_id == None:
         endpoint = f"/ids/publish/alerts"
@@ -44,8 +55,8 @@ async def send_alerts_to_core(ids):
 
     data = {"container_id": ids.container_id, "ensemble_id": ids.ensemble_id, "alerts": json_alerts, "analysis_type": "static", "dataset_id": ids.dataset_id}
     async with httpx.AsyncClient() as client:
-        # set timeout to 90, to be able to send all alerts
-        response: HTTPResponse = await client.post(core_url+endpoint, data=json.dumps(data), timeout=90)
+        # set timeout to 600, to be able to send all alerts
+        response: HTTPResponse = await client.post(core_url+endpoint, data=alert_stream(alerts), timeout=180)
 
     # remove dataset here, becasue removing it in tell_core function removes the id before using it here otehrwise
     if ids.dataset_id != None:
@@ -80,3 +91,6 @@ async def send_alerts_to_core_periodically(ids, period: float=60):
     except asyncio.CancelledError as e:
         print(f"Canceled the sending of alerts")
         
+async def save_dataset_and_start_static_analysis(ids, dataset, file_path):
+    await save_dataset(dataset, file_path)
+    await ids.startStaticAnalysis(file_path)
