@@ -3,8 +3,9 @@ from ..general_utilities import stop_process, ANALYSIS_MODES
 import json 
 class IDSParser(ABC):
 
+    # use the isoformat as printed below to return the timestamps of the parsed lines
     timestamp_format = '%Y-%m-%dT%H:%M:%S.%f%z'
-
+    
     @property
     @abstractmethod
     async def alert_file_location(self):
@@ -33,7 +34,6 @@ class IDSParser(ABC):
         pass
 
 class Alert():
-    # TODO 0: refactor alerts so that there is a destination port and source port differentioation
     """
     Class which contains the most important fields of an alert (one line of anomaly).
     It presents a standardized interface for the different IDS to map their distinct alerts to.
@@ -89,10 +89,9 @@ class Alert():
             "type": self.type,
             "message": self.message
         }
-    
     def toJson(self):
         return json.dumps(self.to_dict())
-
+    
 class IDSBase(ABC):
     """
     Abstract base class for all IDS supported by BICEP
@@ -106,6 +105,7 @@ class IDSBase(ABC):
     static_analysis_running: bool = False
     send_alerts_periodically_task = None
     tap_interface_name: str = None
+    background_tasks = set()
     
     @property
     @abstractmethod
