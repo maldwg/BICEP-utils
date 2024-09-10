@@ -3,8 +3,9 @@ from ..general_utilities import stop_process, ANALYSIS_MODES
 import json 
 class IDSParser(ABC):
 
+    # use the isoformat as printed below to return the timestamps of the parsed lines
     timestamp_format = '%Y-%m-%dT%H:%M:%S.%f%z'
-
+    
     @property
     @abstractmethod
     async def alert_file_location(self):
@@ -89,7 +90,7 @@ class Alert():
             "message": self.message
         }
     def toJson(self):
-        return json.dumps(self.to_dict)
+        return json.dumps(self.to_dict())
     
 class IDSBase(ABC):
     """
@@ -104,6 +105,7 @@ class IDSBase(ABC):
     static_analysis_running: bool = False
     send_alerts_periodically_task = None
     tap_interface_name: str = None
+    background_tasks = set()
     
     @property
     @abstractmethod

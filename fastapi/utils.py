@@ -5,8 +5,6 @@ import httpx
 from ..models.ids_base import Alert
 from ..general_utilities import get_env_variable, ANALYSIS_MODES, save_dataset
 
-
-
 async def tell_core_analysis_has_finished(ids):
     if ids.ensemble_id == None:
         endpoint = f"/ids/analysis/finished"
@@ -33,7 +31,7 @@ async def tell_core_analysis_has_finished(ids):
 
 async def alert_stream(alerts: Alert):
     for alert in alerts:
-        yield json.dumps(alert.toJson()).encode()
+        yield alert.toJson()
 
 
 async def send_alerts_and_stop_analysis(ids):
@@ -54,9 +52,12 @@ async def send_alerts_to_core(ids):
     json_alerts = [ a.to_dict() for a in alerts] 
 
     data = {"container_id": ids.container_id, "ensemble_id": ids.ensemble_id, "alerts": json_alerts, "analysis_type": "static", "dataset_id": ids.dataset_id}
+    
     async with httpx.AsyncClient() as client:
         # set timeout to 600, to be able to send all alerts
-        response: HTTPResponse = await client.post(core_url+endpoint, data=alert_stream(alerts), timeout=180)
+        response: HTTPResponse = await client.post(core_url+endpoint, data=json.dumps(data)
+            ,timeout=180
+        )
 
     # remove dataset here, becasue removing it in tell_core function removes the id before using it here otehrwise
     if ids.dataset_id != None:
