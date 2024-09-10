@@ -89,6 +89,9 @@ class Alert():
             "type": self.type,
             "message": self.message
         }
+    
+    def toJson(self):
+        return json.dumps(self.to_dict())
 
 class IDSBase(ABC):
     """
