@@ -1,7 +1,13 @@
 from abc import ABC, abstractmethod
 from ..general_utilities import stop_process, ANALYSIS_MODES
 import json 
+from http.client import HTTPResponse
+import asyncio
+import httpx
+from ..general_utilities import get_env_variable, ANALYSIS_MODES
+
 class IDSParser(ABC):
+
 
     # use the isoformat as printed below to return the timestamps of the parsed lines
     timestamp_format = '%Y-%m-%dT%H:%M:%S.%f%z'
@@ -10,8 +16,9 @@ class IDSParser(ABC):
     @abstractmethod
     async def alert_file_location(self):
         pass
+
     @abstractmethod
-    async def parse_alerts(self, analysis_mode: ANALYSIS_MODES ,file_location):
+    async def parse_alerts(self):
         """
         Method triggered once after the static analysis is complete or periodically for a network analysis. 
         Takes in the whole file, reads it, parses it, deletes it and returns the parsed lines
@@ -89,7 +96,7 @@ class Alert():
             "type": self.type,
             "message": self.message
         }
-    def toJson(self):
+    def to_json(self):
         return json.dumps(self.to_dict())
     
 class IDSBase(ABC):
@@ -107,6 +114,11 @@ class IDSBase(ABC):
     tap_interface_name: str = None
     background_tasks = set()
     
+    @property
+    @abstractmethod
+    async def parser(self):
+        pass
+
     @property
     @abstractmethod
     async def log_location(self):
@@ -135,7 +147,7 @@ class IDSBase(ABC):
 
 
     @abstractmethod
-    async def startStaticAnalysis(self, file_path: str, container_id: int):
+    async def start_static_analysis(self, file_path: str):
         """
         Method to trigger a static analysis. This method takes a file as input and executes certain OS commands to trigger the analysis
         """
@@ -143,14 +155,15 @@ class IDSBase(ABC):
 
         
     @abstractmethod
-    async def startNetworkAnalysis(self):
+    async def start_network_analysis(self):
         """
         Method to start the network analysis mode where the traffic is caputred on an internal network interface
         """
         pass
 
+    # TODO 0: reafactor so that stop_analysis only stops and create new method to tell core analysis has finished and so on
     @abstractmethod
-    async def stopAnalysis(self):
+    async def stop_analysis(self):
         """
         Method for stopping the process used to trigger the analysis. Can be overwritten in the calss implementation for the IDS
         """
@@ -167,4 +180,87 @@ class IDSBase(ABC):
                 await stop_process(pid)
                 remove_process_ids.append(pid)
         for removed_pid in remove_process_ids:
-            self.pids.remove(removed_pid)
+            self.pids.remove(removed_pid)      
+
+    # TODO 0: adjust to 300 secodns
+    async def send_alerts_to_core_periodically(self, period: float=60):
+        try:
+            if self.ensemble_id == None:
+                endpoint = f"/ids/publish/alerts"
+            else:
+                endpoint = f"/ensemble/publish/alerts"
+            # tell the core to stop/set status to idle again
+            core_url = await get_env_variable("CORE_URL")
+
+            while True:
+                alerts: list[Alert] = await self.parser.parse_alerts(ANALYSIS_MODES.NETWORK.value)
+
+                json_alerts = [ a.to_dict() for a in alerts]
+                data = {"container_id": self.container_id, "ensemble_id": self.ensemble_id, "alerts": json_alerts, "analysis_type": "network", "dataset_id": None}
+                try:
+                    async with httpx.AsyncClient() as client:
+                        # set timeout to 90 seconds to be able to send all alerts
+                        response: HTTPResponse = await client.post(core_url+endpoint, data=json.dumps(data), timeout=90)
+                except Exception as e:
+                    print("Something went wrong during alert sending... retrying on next iteration")
+                await asyncio.sleep(period)
+
+        except asyncio.CancelledError as e:
+            print(f"Canceled the sending of alerts")
+
+
+    async def send_alerts_to_core(self):
+        if self.ensemble_id == None:
+            endpoint = f"/ids/publish/alerts"
+        else:
+            endpoint = f"/ensemble/publish/alerts"
+
+        # tell the core to stop/set status to idle again
+        core_url = await get_env_variable("CORE_URL")
+        alerts: list[Alert] = await self.parser.parse_alerts(ANALYSIS_MODES.STATIC.value)
+        json_alerts = [ a.to_dict() for a in alerts] 
+
+        data = {"container_id": self.container_id, "ensemble_id": self.ensemble_id, "alerts": json_alerts, "analysis_type": "static", "dataset_id": self.dataset_id}
+        
+        async with httpx.AsyncClient() as client:
+            # set timeout to 600, to be able to send all alerts
+            response: HTTPResponse = await client.post(core_url+endpoint, data=json.dumps(data)
+                ,timeout=180
+            )
+
+        # remove dataset here, becasue removing it in tell_core function removes the id before using it here otehrwise
+        if self.dataset_id != None:
+            self.dataset_id = None
+
+        return response
+    
+
+    async def finish_static_analysis_in_background(self):
+        response = await self.send_alerts_to_core()
+        print(response)
+        res = await self.tell_core_analysis_has_finished()
+        print(res)
+
+
+    async def tell_core_analysis_has_finished(self):
+        if self.ensemble_id == None:
+            endpoint = f"/ids/analysis/finished"
+        else:
+            endpoint = f"/ensemble/analysis/finished"
+
+        data = {
+            'container_id': self.container_id,
+            'ensemble_id': self.ensemble_id
+        }
+        
+        # tell the core to stop/set status to idle again
+        core_url = await get_env_variable("CORE_URL")
+            # reset ensemble id to wait if next analysis is for ensemble or ids solo
+
+        async with httpx.AsyncClient() as client:
+                response: HTTPResponse = await client.post(core_url+endpoint, data=json.dumps(data))
+
+        # reset ensemble id after each analysis is completed to keep track if analysis has been triggered for ensemble or not
+        if self.ensemble_id != None:
+            self.ensemble_id = None
+        return response
