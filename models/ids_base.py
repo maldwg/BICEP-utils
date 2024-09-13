@@ -1,10 +1,10 @@
 from abc import ABC, abstractmethod
-from ..general_utilities import stop_process, ANALYSIS_MODES
+from ..general_utilities import stop_process
 import json 
 from http.client import HTTPResponse
 import asyncio
 import httpx
-from ..general_utilities import get_env_variable, ANALYSIS_MODES
+from ..general_utilities import get_env_variable, wait_for_process_completion, create_and_activate_network_interface, mirror_network_traffic_to_interface, remove_network_interface
 
 class IDSParser(ABC):
 
@@ -147,31 +147,20 @@ class IDSBase(ABC):
 
 
     @abstractmethod
-    async def start_static_analysis(self, file_path: str):
+    async def execute_static_analysis_command(self, file_path: str):
         """
-        Method to trigger a static analysis. This method takes a file as input and executes certain OS commands to trigger the analysis
+        Method that takes all actions necessary to execute the IDS command for a static analysis using a pcap file.
+        Returns a pid of the main process spawned.
         """
         pass
 
         
     @abstractmethod
-    async def start_network_analysis(self):
+    async def execute_network_analysis_command(self):
         """
-        Method to start the network analysis mode where the traffic is caputred on an internal network interface
-        """
+        Method that takes all actions necessary to execute the IDS command for a network analysis on the self.tap_interface.
+        Returns a pid of the main process spawned.        """
         pass
-
-    # TODO 0: reafactor so that stop_analysis only stops and create new method to tell core analysis has finished and so on
-    @abstractmethod
-    async def stop_analysis(self):
-        """
-        Method for stopping the process used to trigger the analysis. Can be overwritten in the calss implementation for the IDS
-        """
-        # Example implementation:
-
-        # await stop_process(self.pid)
-        # self.pid = None
-        # await tell_core_analysis_has_finished(self)
 
     async def stop_all_processes(self):
         remove_process_ids = []
@@ -264,3 +253,40 @@ class IDSBase(ABC):
         if self.ensemble_id != None:
             self.ensemble_id = None
         return response
+    
+
+    async def start_network_analysis(self):
+        await create_and_activate_network_interface(self.tap_interface_name)
+        pid = await mirror_network_traffic_to_interface(default_interface="eth0", tap_interface=self.tap_interface_name)
+        self.pids.append(pid)
+        start_ids = await self.execute_network_analysis_command()
+        self.pids.append(start_ids)
+        self.send_alerts_periodically_task = asyncio.create_task(self.send_alerts_to_core_periodically())
+        return f"started network analysis for container with {self.container_id}"
+
+    
+    async def start_static_analysis(self, file_path):
+        pid = await self.execute_static_analysis_command(file_path)
+        self.pids.append(pid)
+
+        await wait_for_process_completion(pid)
+        self.pids.remove(pid)
+        if self.static_analysis_running:
+            task= asyncio.create_task(self.finish_static_analysis_in_background())
+            self.background_tasks.add(task)
+            task.add_done_callback(self.background_tasks.discard)
+        else:
+            await self.stop_analysis()            
+
+
+    # overrides the default method
+    async def stop_analysis(self):
+        self.static_analysis_running = False
+        await self.stop_all_processes()
+        if self.send_alerts_periodically_task != None:            
+            if not self.send_alerts_periodically_task.done():
+                self.send_alerts_periodically_task.cancel()
+            self.send_alerts_periodically_task = None
+        if self.tap_interface_name != None:
+            await remove_network_interface(self.tap_interface_name)
+        await self.tell_core_analysis_has_finished()
