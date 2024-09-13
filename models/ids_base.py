@@ -193,7 +193,7 @@ class IDSBase(ABC):
             core_url = await get_env_variable("CORE_URL")
 
             while True:
-                alerts: list[Alert] = await self.parser.parse_alerts(ANALYSIS_MODES.NETWORK.value)
+                alerts: list[Alert] = await self.parser.parse_alerts()
 
                 json_alerts = [ a.to_dict() for a in alerts]
                 data = {"container_id": self.container_id, "ensemble_id": self.ensemble_id, "alerts": json_alerts, "analysis_type": "network", "dataset_id": None}
@@ -217,7 +217,7 @@ class IDSBase(ABC):
 
         # tell the core to stop/set status to idle again
         core_url = await get_env_variable("CORE_URL")
-        alerts: list[Alert] = await self.parser.parse_alerts(ANALYSIS_MODES.STATIC.value)
+        alerts: list[Alert] = await self.parser.parse_alerts()
         json_alerts = [ a.to_dict() for a in alerts] 
 
         data = {"container_id": self.container_id, "ensemble_id": self.ensemble_id, "alerts": json_alerts, "analysis_type": "static", "dataset_id": self.dataset_id}
