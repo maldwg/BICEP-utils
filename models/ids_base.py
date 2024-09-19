@@ -171,8 +171,7 @@ class IDSBase(ABC):
         for removed_pid in remove_process_ids:
             self.pids.remove(removed_pid)      
 
-    # TODO 0: adjust to 300 secodns
-    async def send_alerts_to_core_periodically(self, period: float=60):
+    async def send_alerts_to_core_periodically(self, period: float=300):
         try:
             if self.ensemble_id == None:
                 endpoint = f"/ids/publish/alerts"
