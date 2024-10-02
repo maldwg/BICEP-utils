@@ -213,7 +213,7 @@ class IDSBase(ABC):
         async with httpx.AsyncClient() as client:
             # set timeout to 600, to be able to send all alerts
             response: HTTPResponse = await client.post(core_url+endpoint, data=json.dumps(data)
-                ,timeout=180
+                ,timeout=300
             )
 
         # remove dataset here, becasue removing it in tell_core function removes the id before using it here otehrwise
